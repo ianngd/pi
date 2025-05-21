@@ -34,7 +34,7 @@ O processo atual de atualização de apólices em uma seguradora que opera por m
 
 ## 📋 Pré-requisitos
 
-- Não há necessidade de instalação de dependências locais, pois o projeto utiliza CDN para carregar o Bootstrap  
+- Não há necessidade de instalação de dependências locais, pois o projeto utiliza CDN para carregar  
 - Navegador web moderno (Chrome, Firefox, Edge, Safari)  
 
 ---
