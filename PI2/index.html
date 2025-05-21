@@ -13,41 +13,41 @@
       background-color: #343a40;
       color: white;
       padding: 1rem;
+    }
+    /* Container para o botão e o ícone com layout flexível */
+    .notification-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       position: relative;
     }
-    .notification-icon {
-      position: absolute;
-      top: 10px;
-      right: 10px;
+    /* Estilo do ícone de notificação */
+    #notificationIcon {
       width: 36px;
       height: 36px;
+      transition: opacity 0.3s ease;
     }
-    .description {
-      padding: 1rem;
-      background-color: #ffffff;
-      margin-bottom: 1rem;
+    /* Estilos para as linhas do backlog baseados no status */
+    tr.status-pendente {
+    --bs-table-bg: #fff3cd;
+    background-color: #fff3cd !important;
     }
-    .form-section {
-      padding: 1rem;
-      background-color: #ffffff;
-      margin-bottom: 1rem;
+
+    tr.status-execucao {
+    --bs-table-bg: #d4edda;
+    background-color: #d4edda !important;
     }
-    .backlog-section {
-      padding: 1rem;
-      background-color: #ffffff;
+
+    tr.status-concluido {
+    --bs-table-bg: #e2e3e5;
+    background-color: #e2e3e5 !important;
     }
-    .status-pendente {
-      background-color: #fff3cd !important;
+
+    tr.origem-susep {
+    --bs-table-bg: #f8d7da;
+    background-color: #f8d7da !important;
     }
-    .status-execucao {
-      background-color: #d4edda !important;
-    }
-    .status-concluido {
-      background-color: #e2e3e5 !important;
-    }
-    .origem-susep {
-      background-color: #f8d7da !important;
-    }
+    
   </style>
 </head>
 <body>
@@ -55,20 +55,20 @@
     <div>
       <h1>WAA</h1>
     </div>
-    <div>
+    <div class="notification-container">
       <button id="generateReport" class="btn btn-light">Gerar Relatório</button>
-      <img id="notificationIcon" src="https://www.pngmart.com/files/22/Notification-Bell-PNG-HD.png" alt="Notificações" class="notification-icon d-none" />
+      <img id="notificationIcon" src="https://www.pngmart.com/files/22/Notification-Bell-PNG-HD.png" alt="Notificações" class="d-none" />
     </div>
   </header>
 
   <div class="container mt-4">
-    <div class="description">
+    <div class="description p-3 mb-3 bg-white rounded">
       <p>
         Sistema criado com o objetivo de atender a disciplina de Projeto Integrador 2 no curso de Tecnologia da Informação, na UFMS - Universidade Federal de Mato Grosso do Sul.
       </p>
     </div>
 
-    <div class="form-section">
+    <div class="form-section p-3 mb-3 bg-white rounded">
       <form id="demandForm">
         <div class="mb-3">
           <label for="fileInput" class="form-label">Upload de Arquivo</label>
@@ -117,7 +117,8 @@
         <button type="submit" class="btn btn-primary">Enviar</button>
       </form>
     </div>
-    <div class="backlog-section mt-4">
+
+    <div class="backlog-section p-3 bg-white rounded">
       <h3>Backlog de Demandas</h3>
       <table class="table table-bordered" id="backlogTable">
         <thead>
@@ -144,10 +145,13 @@
       dataInput.value = today;
 
       const form = document.getElementById('demandForm');
-      const backlogTableBody = document.getElementById('backlogTable').getElementsByTagName('tbody')[0];
+      const backlogTbody = document.getElementById('backlogTable').getElementsByTagName('tbody')[0];
       const notificationIcon = document.getElementById('notificationIcon');
-      const demands = [];
+      const generateReportBtn = document.getElementById('generateReport');
 
+      let demands = [];
+
+      // Função para atualizar o ícone de notificações
       function updateNotificationIcon() {
         const hasCriticalPending = demands.some(d => 
           (d.origem === 'Interno e SUSEP' || d.origem === 'SUSEP') && d.status === 'Pendente'
@@ -155,6 +159,7 @@
         notificationIcon.classList.toggle('d-none', !hasCriticalPending);
       }
 
+      // Criar link de download
       function createDownloadLink(filePath) {
         const link = document.createElement('a');
         link.href = filePath;
@@ -163,8 +168,9 @@
         return link;
       }
 
+      // Adicionar demanda na tabela
       function addDemandToTable(demand) {
-        const row = backlogTableBody.insertRow();
+        const row = backlogTbody.insertRow();
         row.dataset.produto = demand.produto;
         row.dataset.origem = demand.origem;
         row.dataset.status = demand.status;
@@ -205,6 +211,7 @@
         applyRowStyle(row, demand);
       }
 
+      // Aplicar estilos às linhas conforme o status
       function applyRowStyle(row, demand) {
         row.classList.remove('status-pendente', 'status-execucao', 'status-concluido', 'origem-susep');
         if (demand.status === 'Concluído') {
@@ -219,10 +226,9 @@
         }
       }
 
-      // Evento de submit ajustado
+      // Evento de submissão do formulário
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-
         const fileInput = document.getElementById('fileInput');
         const produto = document.getElementById('produto').value;
         const origem = document.getElementById('origem').value;
@@ -236,27 +242,22 @@
           return;
         }
 
-        const file = fileInput.files[0];
-        const filePath = URL.createObjectURL(file);
+        const filePath = URL.createObjectURL(fileInput.files[0]);
 
-        // Se ajustes cumulativos estiver marcado, altera demandas pendentes do mesmo produto
+        // Se ajustes cumulativos estiver marcado, atualiza o status das pendentes do mesmo produto
         if (ajustesCumulativos) {
           demands.forEach(d => {
             if (d.produto === produto && d.status === 'Pendente') {
               d.status = 'Concluído';
             }
           });
+          // Recria a tabela
+          backlogTbody.innerHTML = '';
+          demands.forEach(d => addDemandToTable(d));
         }
 
-        // Cria nova demanda
-        const newDemand = {
-          produto,
-          origem,
-          status,
-          data,
-          descricao,
-          filePath
-        };
+        // Adiciona a nova demanda
+        const newDemand = { produto, origem, status: 'Pendente', data, descricao, filePath };
         demands.push(newDemand);
         addDemandToTable(newDemand);
         updateNotificationIcon();
@@ -265,6 +266,35 @@
         form.reset();
         document.getElementById('data').value = today;
       });
+
+      // Botão de gerar relatório (exemplo simples de CSV)
+      document.getElementById('generateReport').addEventListener('click', () => {
+        if (demands.length === 0) {
+          alert('Nenhuma demanda para gerar relatório.');
+          return;
+        }
+        const csvHeader = ['Produto', 'Origem', 'Status', 'Data', 'Descrição', 'Arquivo'];
+        const csvRows = demands.map(d => [
+          `"${d.produto}"`,
+          `"${d.origem}"`,
+          `"${d.status}"`,
+          `"${d.data}"`,
+          `"${d.descricao}"`,
+          `"${d.filePath}"`
+        ]);
+        const csvContent = [csvHeader, ...csvRows].map(e => e.join(';')).join('\n');
+        const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `relatorio_${today}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      // Atualiza o ícone de notificações ao carregar a página
+      updateNotificationIcon();
     });
   </script>
 </body>
