@@ -1,0 +1,31 @@
+body {
+  background-color: #f8f9fa;
+}
+header {
+  background-color: #343a40;
+  color: white;
+  padding: 1rem;
+}
+.notification-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+#notificationIcon {
+  width: 36px;
+  height: 36px;
+  transition: opacity 0.3s ease;
+}
+tr.status-pendente {
+  background-color: #fff3cd !important;
+}
+tr.status-execucao {
+  background-color: #d4edda !important;
+}
+tr.status-concluido {
+  background-color: #e2e3e5 !important;
+}
+tr.origem-susep {
+  background-color: #f8d7da !important;
+}
